@@ -37,6 +37,7 @@ const App = () => {
   const [responseBody, setResponseBody] = useState(""); // State to store response body
   const [showResponse, setShowResponse] = useState(false); // State to control response display
   const [queryText, setQueryText] = useState(""); // State to store query text
+  const [loading, setLoading] = useState(false); // Loading state
   const fileInput = useRef(null);
 
   const handleFileChange = (event) => {
@@ -49,6 +50,8 @@ const App = () => {
 
   const handleSendMessage = async () => {
     try {
+      setLoading(true); // Set loading state to true
+
       const endpoint = 'http://127.0.0.1:8000/query';
       const formData = new URLSearchParams();
       formData.append('question', message);
@@ -63,25 +66,30 @@ const App = () => {
         },
         body: formData,
       });
-      
+  
       if (response.ok) {
         const data = await response.json();
-        setResponseBody(JSON.stringify(data)); // Store response body in state
-        setShowResponse(true); // Show the response
-        console.log('Query Response:', data);
+        const chatHistory = JSON.parse(data.chat_history);
+        const aiResponse = chatHistory.find(message => message.type === 'AIMessage');
+        if (aiResponse) {
+          setResponseBody(aiResponse.content); // Store AI response in state
+          setShowResponse(true); // Show the response
+          console.log('AI Response:', aiResponse.content);
+        } else {
+          console.error('No AI response found in chat history');
+        }
       } else {
         console.error('Failed to Send Query:', response.statusText);
       }
   
-      // Display alert after successful response
-      alert('Query Received.Please Wait.');
+      // Display alert after unsuccessful response
     } catch (error) {
       console.error('Error sending query:', error);
+    } finally {
+      setLoading(false); // Set loading state to false regardless of success or failure
     }
   }
-  
-  
-  
+
   return (
     <div className="app-container">
       <div className="header">
@@ -108,8 +116,13 @@ const App = () => {
           handleSendMessage={handleSendMessage} 
         />
       </div>
+      {loading && ( // Render loading overlay when loading is true
+        <div className="loading-overlay">
+          <div className="loading-icon"></div>
+        </div>
+      )}
     </div>
   );
 }
 
-export default App; 
+export default App;
