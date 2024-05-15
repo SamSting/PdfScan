@@ -3,6 +3,9 @@ import './App.css';
 import logo from './images/dsfsf.png'; // Import the logo image
 import FileForm from './components/FileForm'; // Import the FileForm component
 
+
+
+
 const UploadButton = ({ fileInput }) => {
   return (
     <div>
@@ -51,7 +54,7 @@ const App = () => {
   const handleSendMessage = async () => {
     try {
       setLoading(true); // Set loading state to true
-
+  
       const endpoint = 'http://127.0.0.1:8000/query';
       const formData = new URLSearchParams();
       formData.append('question', message);
@@ -80,15 +83,17 @@ const App = () => {
         }
       } else {
         console.error('Failed to Send Query:', response.statusText);
+        // Display alert after unsuccessful response
       }
-  
-      // Display alert after unsuccessful response
     } catch (error) {
       console.error('Error sending query:', error);
+      // Display alert for unexpected errors
     } finally {
       setLoading(false); // Set loading state to false regardless of success or failure
     }
   }
+  
+  
 
   return (
     <div className="app-container">
